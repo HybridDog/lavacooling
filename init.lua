@@ -1,18 +1,26 @@
 -------------------------------------------lavacooling-----------------------------------------------
 
+--Change the old block
+
+minetest.register_node(":lavacooling:obsidian", {})
+minetest.register_abm ({
+	nodenames = {"lavacooling:obsidian"},
+	interval = 0,
+	chance = 1,
+	action = function (pos)
+		minetest.env: add_node (pos, {name = "default:obsidian"})
+	end,
+})
+
+
 --Nodes/Items
 
-local function lavacooling_node(name, desc)
-minetest.register_node("lavacooling:"..name, {
-	description = desc,
-	tiles = {"lavacooling_"..name..".png"},
-	groups = {cracky=2},
+minetest.register_node("lavacooling:obsidian_brick", {
+	description = "Obsidian Brick",
+	tiles = {"lavacooling_obsidian_brick.png"},
 	sounds = default.node_sound_stone_defaults(),
+	groups = {cracky=1,level=2},
 })
-end
-
-lavacooling_node("obsidian", "Obsidian")
-lavacooling_node("obsidian_brick", "Obsidian Brick")
 
 --tooldef("lavacooling", "obsidian", "Obsidian", 10, 0.5, 0.5, 0.5, 0.5)
 
@@ -22,8 +30,8 @@ lavacooling_node("obsidian_brick", "Obsidian Brick")
 minetest.register_craft({
 	output = "lavacooling:obsidian_brick 4",
 	recipe = {
-		{"lavacooling:obsidian", "lavacooling:obsidian"},
-		{"lavacooling:obsidian", "lavacooling:obsidian"},
+		{"default:obsidian", "default:obsidian"},
+		{"default:obsidian", "default:obsidian"},
 	}
 })
 
@@ -51,7 +59,7 @@ minetest.register_abm ({
 })
 end
 
-lavacooling_abm("default:lava_source", WATER, "lavacooling:obsidian")
+lavacooling_abm("default:lava_source", WATER, "default:obsidian")
 lavacooling_abm("default:lava_flowing", WATER, "default:cobble")
 
 minetest.register_abm ({
@@ -74,6 +82,6 @@ minetest.register_abm ({
 	interval = 5,
 	chance = 60,
 	action = function (pos)
-		minetest.env: add_node (pos, {name = "lavacooling:obsidian"})
+		minetest.env: add_node (pos, {name = "default:obsidian"})
 	end,
 })]]
