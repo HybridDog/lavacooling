@@ -22,6 +22,15 @@ minetest.register_node("lavacooling:obsidian_brick", {
 	groups = {cracky=1,level=2},
 })
 
+minetest.register_node("lavacooling:basalt", {
+	description = "Basalt",
+	tiles = {"lavacooling_basalt.png","lavacooling_basalt.png","lavacooling_basalt_side.png"},
+	sounds = default.node_sound_stone_defaults(),
+	groups = {cracky=1,level=2},
+	drop = "default:cobble",
+})
+
+
 --tooldef("lavacooling", "obsidian", "Obsidian", 10, 0.5, 0.5, 0.5, 0.5)
 
 
@@ -59,8 +68,11 @@ minetest.register_abm ({
 })
 end
 
+default.cool_lava_source = function()end
+default.cool_lava_flowing = function()end
+
 lavacooling_abm("default:lava_source", WATER, "default:obsidian")
-lavacooling_abm("default:lava_flowing", WATER, "default:cobble")
+lavacooling_abm("default:lava_flowing", WATER, "lavacooling:basalt")
 
 minetest.register_abm ({
 	nodenames = {"default:water_source"},
