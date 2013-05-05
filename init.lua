@@ -1,4 +1,6 @@
 -------------------------------------------lavacooling-----------------------------------------------
+local WATER = {"default:water_source", "default:water_flowing"}
+local LAVA = {"default:lava_flowing","default:lava_source"}
 
 --Change the old block
 
@@ -59,7 +61,7 @@ minetest.register_abm ({
 				or minetest.env: get_node({x=pos.x, y=pos.y+i, z=pos.z}).name == water
 				or minetest.env: get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == water then
 					minetest.env: add_node (pos, {name = output})
-					minetest.sound_play("lavacooling", {pos = pos,	gain = 1.0,	max_hear_distance = 5})
+					minetest.sound_play("lavacooling", {pos = pos,	gain = 0.5,	max_hear_distance = 5})
 					return
 				end
 			end
@@ -82,7 +84,7 @@ minetest.register_abm ({
 		for _, lava in ipairs(LAVA) do
 			if minetest.env: get_node({x=pos.x, y=pos.y+1, z=pos.z}).name == lava then
 				minetest.env: add_node (pos, {name = "default:stone"})
-				minetest.sound_play("lavacooling", {pos = pos,	gain = 1.0,	max_hear_distance = 5})
+				minetest.sound_play("lavacooling", {pos = pos,	gain = 0.5,	max_hear_distance = 5})
 				return
 			end
 		end
