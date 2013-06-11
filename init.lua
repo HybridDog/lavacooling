@@ -21,6 +21,7 @@ local function coolnode(na, pos)
 		false, --collisiondetection
 		"smoke_puff.png" --texture
 	)
+	print("[lavacooling] "..na.." appeared at ("..pos.x..", "..pos.y..", "..pos.z..")")
 end
 
 
@@ -203,3 +204,5 @@ minetest.register_abm ({
 })
 
 end
+
+print("[lavacooling] loaded")
