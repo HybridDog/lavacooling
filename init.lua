@@ -111,7 +111,27 @@ default.cool_lava_source = function()end
 default.cool_lava_flowing = function()end
 
 lavacooling_abm("default:lava_source", WATER, "default:obsidian")
-lavacooling_abm("default:lava_flowing", WATER, "lavacooling:basalt")
+minetest.register_abm ({
+	nodenames = {"default:lava_flowing"},
+	interval = 0,
+	chance = 1,
+	action = function (pos)
+		for _, water in ipairs(WATER) do
+			for i=-1,1,2 do
+				if minetest.env: get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == water
+				or minetest.env: get_node({x=pos.x, y=pos.y+i, z=pos.z}).name == water
+				or minetest.env: get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == water then
+					if pos.y < -10+math.random(5) then
+						coolnode("lavacooling:basalt", pos)
+					else
+						coolnode("default:cobble", pos)
+					end
+					return
+				end
+			end
+		end
+	end,
+})
 
 minetest.register_abm ({
 	nodenames = {"default:water_source"},
