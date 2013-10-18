@@ -3,7 +3,7 @@ local WATER = {"default:water_source", "default:water_flowing"}
 local LAVA = {"default:lava_flowing","default:lava_source"}
 
 local function coolnode(na, pos)
-	minetest.env:add_node (pos, {name = na})
+	minetest.add_node (pos, {name = na})
 	minetest.sound_play("lavacooling", {pos = pos,	gain = 0.5,	max_hear_distance = 5})
 	minetest.add_particlespawner(
 		3, --amount
@@ -33,7 +33,7 @@ minetest.register_abm ({
 	interval = 0,
 	chance = 1,
 	action = function (pos)
-		minetest.env: add_node (pos, {name = "default:obsidian"})
+		minetest.add_node (pos, {name = "default:obsidian"})
 	end,
 })
 
@@ -73,19 +73,66 @@ minetest.register_craft({
 
 --ABMs
 
+local default_ore_list = {
+	{"stone_with_coal", 50},
+	{"stone_with_iron", 200},
+	{"stone_with_diamond", 500},
+	{"stone_with_mese", 600},
+}
+
+local extrablocks_ore_list = {
+	{"marble_ore", 50},
+	{"lapis_lazuli_ore", 60},
+	{"goldstone", 500},
+	{"iringnite_ore", 600},
+}
+
+local function ret_ore(ore_list, mname)
+	if mname == nil then
+		mname = ""
+	end
+	for _,i in ipairs(ore_list) do
+		if math.random(i[2]) == 1 then
+			return mname..i[1]
+		end
+	end
+	return false
+end
+
+local extrablocks_enabled = minetest.get_modpath("extrablocks")
+
 local function ore()
-	if math.random(50) == 1 then return "default:stone_with_coal" end
-	if math.random(200) == 1 then return "default:stone_with_iron" end
-	if math.random(500) == 1 then return "default:stone_with_diamond" end
-	if math.random(600) == 1 then return "default:stone_with_mese" end
-	if minetest.get_modpath("extrablocks") then
-		if math.random(50) == 7 then return "extrablocks:marble_ore" end
-		if math.random(60) == 7 then return "extrablocks:lapis_lazuli_ore" end
-		if math.random(500) == 7 then return "extrablocks:goldstone" end
-		if math.random(600) == 7 then return "extrablocks:iringnite_ore" end	
+	local default_ore = ret_ore(default_ore_list, "default:")
+	if default_ore then
+		return default_ore
+	end
+	if extrablocks_enabled then
+		local extrablocks_ore = ret_ore(default_ore_list, "extrablocks:")
+		if extrablocks_ore then
+			return extrablocks_ore
+		end
 	end
 	return "default:stone"
 end
+
+
+local function find_coolingnodes(coolingnodes, pos)
+	for _, water in ipairs(coolingnodes) do
+		for i=-1,1,2 do
+			for _,p in ipairs({
+				{x=pos.x+i, y=pos.y, z=pos.z},
+				{x=pos.x, y=pos.y+i, z=pos.z},
+				{x=pos.x, y=pos.y, z=pos.z+i}
+			}) do
+				if minetest.get_node(p).name == water then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
 
 local function lavacooling_abm(input, coolingnodes, output)
 minetest.register_abm ({
@@ -93,15 +140,8 @@ minetest.register_abm ({
 	interval = 0,
 	chance = 1,
 	action = function (pos)
-		for _, water in ipairs(coolingnodes) do
-			for i=-1,1,2 do
-				if minetest.env: get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == water
-				or minetest.env: get_node({x=pos.x, y=pos.y+i, z=pos.z}).name == water
-				or minetest.env: get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == water then
-					coolnode(output, pos)
-					return
-				end
-			end
+		if find_coolingnodes(coolingnodes, pos) then
+			coolnode(output, pos)
 		end
 	end,
 })
@@ -116,19 +156,13 @@ minetest.register_abm ({
 	interval = 0,
 	chance = 1,
 	action = function (pos)
-		for _, water in ipairs(WATER) do
-			for i=-1,1,2 do
-				if minetest.env: get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == water
-				or minetest.env: get_node({x=pos.x, y=pos.y+i, z=pos.z}).name == water
-				or minetest.env: get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == water then
-					if pos.y < -10+math.random(5) then
-						coolnode("lavacooling:basalt", pos)
-					else
-						coolnode("default:cobble", pos)
-					end
-					return
-				end
+		if find_coolingnodes(WATER, pos) then
+			if pos.y < -10+math.random(5) then
+				coolnode("lavacooling:basalt", pos)
+			else
+				coolnode("default:cobble", pos)
 			end
+
 		end
 	end,
 })
@@ -139,7 +173,7 @@ minetest.register_abm ({
 	chance = 1,
 	action = function (pos)
 		for _, lava in ipairs(LAVA) do
-			if minetest.env: get_node({x=pos.x, y=pos.y+1, z=pos.z}).name == lava then
+			if minetest.get_node({x=pos.x, y=pos.y+1, z=pos.z}).name == lava then
 				coolnode(ore(), pos)
 				return
 			end
@@ -147,47 +181,58 @@ minetest.register_abm ({
 	end,
 })
 
+
+
 if minetest.get_modpath("sumpf") then
 lavacooling_abm("default:lava_source", {"sumpf:dirtywater_flowing", "sumpf:dirtywater_source"}, "default:obsidian")
 
+local sw_ore_list = {
+	{"sumpf:kohle", 37},
+	{"sumpf:eisen", 50},
+	{"default:mese", 200},
+	{"default:obsidian", 250},
+}
+
 local function dirtyblocks(pos)
-	if minetest.env: get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "sumpf:dirtywater_flowing" then
+	local node_under = minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name
+	if node_under == "sumpf:dirtywater_flowing" then
 		return "default:dirt"
 	end
 	for i=-1,1,2 do
-		if minetest.env: get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "sumpf:dirtywater_flowing"
-		or minetest.env: get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "sumpf:dirtywater_flowing"
-			then return "default:sand"
+		if minetest.get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "sumpf:dirtywater_flowing"
+		or minetest.get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "sumpf:dirtywater_flowing" then
+			return "default:sand"
 		end
 	end
-	if minetest.env: get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "sumpf:dirtywater_source" then
-		if math.random(37) == 1 then return "sumpf:kohle" end
-		if math.random(50) == 1 then return "sumpf:eisen" end
-		if math.random(200) == 1 then return "default:mese" end
-		if math.random(250) == 1 then return "default:obsidian" end
+	if node_under == "sumpf:dirtywater_source" then
+		local sw_ore = ret_ore(sw_ore_list)
+		if sw_ore then
+			return sw_ore
+		end
 		return "sumpf:junglestone"
 	end
 end
 
 local function dirtyblocks2(pos)
-	if minetest.env: get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
+	if minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
 		return "default:clay"
 	end
 	for i=-1,1,2 do
-		if minetest.env: get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "default:lava_flowing"
-			then return "sumpf:sumpf"
+		if minetest.get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "default:lava_flowing" then
+			return "sumpf:sumpf"
 		end
-		if minetest.env: get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "default:lava_flowing"
-			then return "sumpf:peat"
+		if minetest.get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "default:lava_flowing" then
+			return "sumpf:peat"
 		end
 	end
 end
 
 local function dirtyblocks3(pos)
-	if minetest.env: get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
+	if minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
 		return "default:gravel"
 	end
 end
+
 minetest.register_abm ({
 	nodenames = {"sumpf:dirtywater_flowing"},
 	interval = 0,
