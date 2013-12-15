@@ -1,10 +1,11 @@
+local load_time_start = os.clock()
 -------------------------------------------lavacooling-----------------------------------------------
 local WATER = {"default:water_source", "default:water_flowing"}
 local LAVA = {"default:lava_flowing","default:lava_source"}
 
 local function coolnode(na, pos)
 	minetest.add_node (pos, {name = na})
-	minetest.sound_play("lavacooling", {pos = pos,	gain = 0.5,	max_hear_distance = 5})
+	minetest.sound_play("default_cool_lava", {pos = pos,  gain = 0.25})
 	minetest.add_particlespawner(
 		3, --amount
 		0.1, --time
@@ -25,35 +26,41 @@ local function coolnode(na, pos)
 end
 
 
---Change the old block
+--Change the old nodes
 
-minetest.register_node(":lavacooling:obsidian", {})
-minetest.register_abm ({
-	nodenames = {"lavacooling:obsidian"},
-	interval = 0,
-	chance = 1,
-	action = function (pos)
-		minetest.add_node (pos, {name = "default:obsidian"})
-	end,
-})
+for _,node in ipairs({
+	{"lavacooling:obsidian", "default:obsidian"},
+	{"lavacooling:obsidian_brick", "default:obsidian_brick"},
+	{"lavacooling:basalt", "default:basalt"},
+}) do
+	local input = node[1]
+	local output = node[2]
+	minetest.register_node(":"..input, {})
+	minetest.register_abm ({
+		nodenames = {input},
+		interval = 0,
+		chance = 1,
+		action = function (pos)
+			minetest.add_node (pos, {name = output})
+			print("[lavacooling] "..input.." changed to "..output.." at ("..pos.x..", "..pos.y..", "..pos.z..")")
+		end,
+	})
+end
 
 
 --Nodes/Items
 
-minetest.register_node("lavacooling:obsidian_brick", {
-	description = "Obsidian Brick",
-	tiles = {"lavacooling_obsidian_brick.png"},
-	sounds = default.node_sound_stone_defaults(),
-	groups = {cracky=1,level=2},
-})
+local tmp = minetest.registered_nodes["default:obsidian"]
+tmp.description = tmp.description.." Brick"
+tmp.tiles = {"lavacooling_obsidian_brick.png"}
+minetest.register_node(":default:obsidian_brick", tmp)
 
-minetest.register_node("lavacooling:basalt", {
+minetest.register_node(":default:basalt", {
 	description = "Basalt",
 	tiles = {"lavacooling_basalt.png","lavacooling_basalt.png","lavacooling_basalt_side.png",
 			 "lavacooling_basalt_side.png","lavacooling_basalt_side.png^[transformR180","lavacooling_basalt_side.png"},
 	sounds = default.node_sound_stone_defaults(),
 	groups = {cracky=3},
-	drop = "default:cobble",
 })
 
 
@@ -63,7 +70,7 @@ minetest.register_node("lavacooling:basalt", {
 --Crafts
 
 minetest.register_craft({
-	output = "lavacooling:obsidian_brick 4",
+	output = "default:obsidian_brick 4",
 	recipe = {
 		{"default:obsidian", "default:obsidian"},
 		{"default:obsidian", "default:obsidian"},
@@ -158,7 +165,7 @@ minetest.register_abm ({
 	action = function (pos)
 		if find_coolingnodes(WATER, pos) then
 			if pos.y < -10+math.random(5) then
-				coolnode("lavacooling:basalt", pos)
+				coolnode("default:basalt", pos)
 			else
 				coolnode("default:cobble", pos)
 			end
@@ -270,4 +277,4 @@ minetest.register_abm ({
 
 end
 
-print("[lavacooling] loaded")
+print(string.format("[lavacooling] loaded after ca. %.2fs", os.clock() - load_time_start))

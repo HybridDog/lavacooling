@@ -1,8 +1,9 @@
 Adds Obsiadian which comes from lava.
 
 License:
-	cc-by-sa 3.0 for the textures, WTFPL for everything else.
 	All code is WTFPL.
 	WTFPL for the texture changes (Obsidian Brick and tools).
 	Textures edited with Gimp.
-	Sounds from ambience mod.
+
+TODO:
+— add a TODO list
