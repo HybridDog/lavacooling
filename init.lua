@@ -25,6 +25,20 @@ local function coolnode(na, pos)
 	print("[lavacooling] "..na.." appeared at ("..pos.x..", "..pos.y..", "..pos.z..")")
 end
 
+local function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
 
 --Change the old nodes
 
@@ -50,9 +64,10 @@ end
 
 --Nodes/Items
 
-local tmp = minetest.registered_nodes["default:obsidian"]
+local tmp = deepcopy(minetest.registered_nodes["default:obsidian"])
 tmp.description = tmp.description.." Brick"
 tmp.tiles = {"lavacooling_obsidian_brick.png"}
+	
 minetest.register_node(":default:obsidian_brick", tmp)
 
 minetest.register_node(":default:basalt", {
