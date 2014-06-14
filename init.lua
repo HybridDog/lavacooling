@@ -42,7 +42,7 @@ end
 
 --Change the old nodes
 
-for _,node in ipairs({
+for _,node in pairs({
 	{"lavacooling:obsidian", "default:obsidian"},
 	{"lavacooling:obsidian_brick", "default:obsidian_brick"},
 	{"lavacooling:basalt", "default:basalt"},
@@ -64,12 +64,6 @@ end
 
 --Nodes/Items
 
-local tmp = deepcopy(minetest.registered_nodes["default:obsidian"])
-tmp.description = tmp.description.." Brick"
-tmp.tiles = {"lavacooling_obsidian_brick.png"}
-	
-minetest.register_node(":default:obsidian_brick", tmp)
-
 minetest.register_node(":default:basalt", {
 	description = "Basalt",
 	tiles = {"lavacooling_basalt.png","lavacooling_basalt.png","lavacooling_basalt_side.png",
@@ -78,19 +72,25 @@ minetest.register_node(":default:basalt", {
 	groups = {cracky=3},
 })
 
-
+if not minetest.registered_nodes["default:obsidian_brick"] then
+	local tmp = deepcopy(minetest.registered_nodes["default:obsidian"])
+	tmp.description = tmp.description.." Brick"
+	tmp.tiles = {"lavacooling_obsidian_brick.png"}
+	
+	minetest.register_node(":default:obsidian_brick", tmp)
 --tooldef("lavacooling", "obsidian", "Obsidian", 10, 0.5, 0.5, 0.5, 0.5)
 
 
 --Crafts
 
-minetest.register_craft({
-	output = "default:obsidian_brick 4",
-	recipe = {
-		{"default:obsidian", "default:obsidian"},
-		{"default:obsidian", "default:obsidian"},
-	}
-})
+	minetest.register_craft({
+		output = "default:obsidian_brick 4",
+		recipe = {
+			{"default:obsidian", "default:obsidian"},
+			{"default:obsidian", "default:obsidian"},
+		}
+	})
+end
 
 
 --ABMs
@@ -139,9 +139,9 @@ end
 
 
 local function find_coolingnodes(coolingnodes, pos)
-	for _, water in ipairs(coolingnodes) do
+	for _, water in pairs(coolingnodes) do
 		for i=-1,1,2 do
-			for _,p in ipairs({
+			for _,p in pairs({
 				{x=pos.x+i, y=pos.y, z=pos.z},
 				{x=pos.x, y=pos.y+i, z=pos.z},
 				{x=pos.x, y=pos.y, z=pos.z+i}
@@ -246,7 +246,7 @@ minetest.register_abm ({
 	interval = 0,
 	chance = 1,
 	action = function (pos)
-		for _, lava in ipairs(LAVA) do
+		for _, lava in pairs(LAVA) do
 			if minetest.get_node({x=pos.x, y=pos.y+1, z=pos.z}).name == lava then
 				coolnode(ore(), pos)
 				return
