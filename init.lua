@@ -6,22 +6,18 @@ local LAVA = {"default:lava_flowing","default:lava_source"}
 local function coolnode(na, pos)
 	minetest.add_node (pos, {name = na})
 	minetest.sound_play("default_cool_lava", {pos = pos,  gain = 0.25})
-	minetest.add_particlespawner(
-		3, --amount
-		0.1, --time
-		{x=pos.x-0.2, y=pos.y-0.2, z=pos.z-0.2}, --minpos
-		{x=pos.x+0.2, y=pos.y+0.2, z=pos.z+0.2}, --maxpos
-		{x=-0, y=-0, z=-0}, --minvel
-		{x=0, y=0, z=0}, --maxvel
-		{x=-0.5,y=5,z=-0.5}, --minacc
-		{x=0.5,y=5,z=0.5}, --maxacc
-		0.1, --minexptime
-		1, --maxexptime
-		2, --minsize
-		8, --maxsize
-		false, --collisiondetection
-		"smoke_puff.png" --texture
-	)
+	minetest.add_particlespawner({
+		amount = 3,
+		time = 0.1,
+		minpos = {x=pos.x-0.2, y=pos.y-0.2, z=pos.z-0.2},
+		maxpos = {x=pos.x+0.2, y=pos.y+0.2, z=pos.z+0.2},
+		minacc = {x=-0.5,y=5,z=-0.5},
+		maxacc = {x=0.5,y=5,z=0.5},
+		minexptime = 0.1,
+		minsize = 2,
+		maxsize = 8,
+		texture = "smoke_puff.png"
+	})
 	print("[lavacooling] "..na.." appeared at ("..pos.x..", "..pos.y..", "..pos.z..")")
 end
 
