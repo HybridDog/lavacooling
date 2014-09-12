@@ -72,7 +72,7 @@ if not minetest.registered_nodes["default:obsidian_brick"] then
 	local tmp = deepcopy(minetest.registered_nodes["default:obsidian"])
 	tmp.description = tmp.description.." Brick"
 	tmp.tiles = {"lavacooling_obsidian_brick.png"}
-	
+
 	minetest.register_node(":default:obsidian_brick", tmp)
 --tooldef("lavacooling", "obsidian", "Obsidian", 10, 0.5, 0.5, 0.5, 0.5)
 
@@ -200,7 +200,7 @@ local function cool_wf_vm(pos)
 			end
 		end
 	end
-				
+
 
 	manip:set_data(nodes)
 	manip:write_to_map()
