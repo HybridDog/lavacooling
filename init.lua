@@ -125,7 +125,7 @@ local function ore()
 		return default_ore
 	end
 	if extrablocks_enabled then
-		local extrablocks_ore = ret_ore(default_ore_list, "extrablocks:")
+		local extrablocks_ore = ret_ore(extrablocks_ore_list, "extrablocks:")
 		if extrablocks_ore then
 			return extrablocks_ore
 		end
