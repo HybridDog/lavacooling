@@ -40,7 +40,8 @@ end
 
 for _,node in pairs({
 	{"lavacooling:obsidian", "default:obsidian"},
-	{"lavacooling:obsidian_brick", "default:obsidian_brick"},
+	{"lavacooling:obsidian_brick", "default:obsidianbrick"},
+	{"default:obsidian_brick", "default:obsidianbrick"},
 	{"lavacooling:basalt", "default:basalt"},
 }) do
 	local input = node[1]
@@ -61,26 +62,26 @@ end
 --Nodes/Items
 
 minetest.register_node(":default:basalt", {
-	description = "Basalt",
+	description = "basalt",
 	tiles = {"lavacooling_basalt.png","lavacooling_basalt.png","lavacooling_basalt_side.png",
 			 "lavacooling_basalt_side.png","lavacooling_basalt_side.png^[transformR180","lavacooling_basalt_side.png"},
 	sounds = default.node_sound_stone_defaults(),
 	groups = {cracky=3},
 })
 
-if not minetest.registered_nodes["default:obsidian_brick"] then
+if not minetest.registered_nodes["default:obsidianbrick"] then
 	local tmp = deepcopy(minetest.registered_nodes["default:obsidian"])
-	tmp.description = tmp.description.." Brick"
+	tmp.description = tmp.description.." brick"
 	tmp.tiles = {"lavacooling_obsidian_brick.png"}
 
-	minetest.register_node(":default:obsidian_brick", tmp)
+	minetest.register_node(":default:obsidianbrick", tmp)
 --tooldef("lavacooling", "obsidian", "Obsidian", 10, 0.5, 0.5, 0.5, 0.5)
 
 
 --Crafts
 
 	minetest.register_craft({
-		output = "default:obsidian_brick 4",
+		output = "default:obsidianbrick 4",
 		recipe = {
 			{"default:obsidian", "default:obsidian"},
 			{"default:obsidian", "default:obsidian"},
