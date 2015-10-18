@@ -36,28 +36,6 @@ local function deepcopy(orig)
     return copy
 end
 
---Change the old nodes
-
-for _,node in pairs({
-	{"lavacooling:obsidian", "default:obsidian"},
-	{"lavacooling:obsidian_brick", "default:obsidianbrick"},
-	{"default:obsidian_brick", "default:obsidianbrick"},
-	{"lavacooling:basalt", "default:basalt"},
-}) do
-	local input = node[1]
-	local output = node[2]
-	minetest.register_node(":"..input, {})
-	minetest.register_abm ({
-		nodenames = {input},
-		interval = 0,
-		chance = 1,
-		action = function (pos)
-			minetest.add_node (pos, {name = output})
-			print("[lavacooling] "..input.." changed to "..output.." at ("..pos.x..", "..pos.y..", "..pos.z..")")
-		end,
-	})
-end
-
 
 --Nodes/Items
 
@@ -255,91 +233,115 @@ minetest.register_abm ({
 
 
 if minetest.get_modpath("sumpf") then
-lavacooling_abm("default:lava_source", {"sumpf:dirtywater_flowing", "sumpf:dirtywater_source"}, "default:obsidian")
+	lavacooling_abm("default:lava_source", {"sumpf:dirtywater_flowing", "sumpf:dirtywater_source"}, "default:obsidian")
 
-local sw_ore_list = {
-	{"sumpf:kohle", 37},
-	{"sumpf:eisen", 50},
-	{"default:mese", 200},
-	{"default:obsidian", 250},
-}
+	local sw_ore_list = {
+		{"sumpf:kohle", 37},
+		{"sumpf:eisen", 50},
+		{"default:mese", 200},
+		{"default:obsidian", 250},
+	}
 
-local function dirtyblocks(pos)
-	local node_under = minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name
-	if node_under == "sumpf:dirtywater_flowing" then
-		return "default:dirt"
-	end
-	for i=-1,1,2 do
-		if minetest.get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "sumpf:dirtywater_flowing"
-		or minetest.get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "sumpf:dirtywater_flowing" then
-			return "default:sand"
+	local function dirtyblocks(pos)
+		local node_under = minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name
+		if node_under == "sumpf:dirtywater_flowing" then
+			return "default:dirt"
+		end
+		for i=-1,1,2 do
+			if minetest.get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "sumpf:dirtywater_flowing"
+			or minetest.get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "sumpf:dirtywater_flowing" then
+				return "default:sand"
+			end
+		end
+		if node_under == "sumpf:dirtywater_source" then
+			local sw_ore = ret_ore(sw_ore_list)
+			if sw_ore then
+				return sw_ore
+			end
+			return "sumpf:junglestone"
 		end
 	end
-	if node_under == "sumpf:dirtywater_source" then
-		local sw_ore = ret_ore(sw_ore_list)
-		if sw_ore then
-			return sw_ore
+
+	local function dirtyblocks2(pos)
+		if minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
+			return "default:clay"
 		end
-		return "sumpf:junglestone"
+		for i=-1,1,2 do
+			if minetest.get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "default:lava_flowing" then
+				return "sumpf:sumpf"
+			end
+			if minetest.get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "default:lava_flowing" then
+				return "sumpf:peat"
+			end
+		end
 	end
+
+	local function dirtyblocks3(pos)
+		if minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
+			return "default:gravel"
+		end
+	end
+
+	minetest.register_abm ({
+		nodenames = {"sumpf:dirtywater_flowing"},
+		interval = 0,
+		chance = 1,
+		action = function (pos)
+			local nam = dirtyblocks3(pos)
+			if nam then
+				coolnode(nam, pos)
+			end
+		end,
+	})
+	minetest.register_abm ({
+		nodenames = {"sumpf:dirtywater_source"},
+		interval = 0,
+		chance = 1,
+		action = function (pos)
+			local nam = dirtyblocks2(pos)
+			if nam then
+				coolnode(nam, pos)
+			end
+		end,
+	})
+
+	minetest.register_abm ({
+		nodenames = {"default:lava_flowing"},
+		interval = 0,
+		chance = 1,
+		action = function (pos)
+			local nam = dirtyblocks(pos)
+			if nam then
+				coolnode(nam, pos)
+			end
+		end,
+	})
 end
 
-local function dirtyblocks2(pos)
-	if minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
-		return "default:clay"
-	end
-	for i=-1,1,2 do
-		if minetest.get_node({x=pos.x+i, y=pos.y, z=pos.z}).name == "default:lava_flowing" then
-			return "sumpf:sumpf"
-		end
-		if minetest.get_node({x=pos.x, y=pos.y, z=pos.z+i}).name == "default:lava_flowing" then
-			return "sumpf:peat"
-		end
-	end
+
+-- legacy
+--Change the old nodes
+
+for _,node in pairs({
+	{"lavacooling:obsidian", "default:obsidian"},
+	{"lavacooling:obsidian_brick", "default:obsidianbrick"},
+	{"default:obsidian_brick", "default:obsidianbrick"},
+	{"lavacooling:basalt", "default:basalt"},
+}) do
+	local input = node[1]
+	local output = node[2]
+	minetest.register_node(":"..input, {})
+	minetest.register_abm ({
+		nodenames = {input},
+		interval = 0,
+		chance = 1,
+		action = function (pos)
+			minetest.add_node (pos, {name = output})
+			print("[lavacooling] "..input.." changed to "..output.." at ("..pos.x..", "..pos.y..", "..pos.z..")")
+		end,
+	})
 end
 
-local function dirtyblocks3(pos)
-	if minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name == "default:lava_flowing" then
-		return "default:gravel"
-	end
-end
-
-minetest.register_abm ({
-	nodenames = {"sumpf:dirtywater_flowing"},
-	interval = 0,
-	chance = 1,
-	action = function (pos)
-		local nam = dirtyblocks3(pos)
-		if nam then
-			coolnode(nam, pos)
-		end
-	end,
-})
-minetest.register_abm ({
-	nodenames = {"sumpf:dirtywater_source"},
-	interval = 0,
-	chance = 1,
-	action = function (pos)
-		local nam = dirtyblocks2(pos)
-		if nam then
-			coolnode(nam, pos)
-		end
-	end,
-})
-
-minetest.register_abm ({
-	nodenames = {"default:lava_flowing"},
-	interval = 0,
-	chance = 1,
-	action = function (pos)
-		local nam = dirtyblocks(pos)
-		if nam then
-			coolnode(nam, pos)
-		end
-	end,
-})
-
-end
 
 local time = math.floor(tonumber(os.clock()-load_time_start)*100+0.5)/100
 local msg = "[lavacooling] loaded after ca. "..time
