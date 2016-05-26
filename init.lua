@@ -48,6 +48,8 @@ minetest.register_node(":default:basalt", {
 })
 
 if not minetest.registered_nodes["default:obsidianbrick"] then
+	minetest.log("error", "[lavacooling] default obsidian brick missing")
+
 	local tmp = deepcopy(minetest.registered_nodes["default:obsidian"])
 	tmp.description = tmp.description.." brick"
 	tmp.tiles = {"lavacooling_obsidian_brick.png"}
